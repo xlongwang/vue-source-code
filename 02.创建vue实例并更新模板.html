@@ -9,7 +9,7 @@
 <body>
        <div id="root">
             <div>
-                 <p>{{ name }} -- {{ message }} 22</p>
+                 <p>{{ name }} -- {{ message }}</p>
             </div>
             <div>{{ name }}</div>
             <div>{{ message }}</div>
@@ -25,7 +25,6 @@
           
           function compiler (template, datas){
                let childNodes = template.childNodes; 
-
                for(let i = 0; i < childNodes.length; i++ ){
                    let type = childNodes[i].nodeType;
  
@@ -41,9 +40,39 @@
                     }
                }
           }
-          let generateNode = tmpNode.cloneNode( true )
-          compiler(generateNode, data)
-          tmpNode.parentNode.replaceChild(generateNode, tmpNode)
+          function JGVue(options) {
+             //   内部数据使用下划线 ， 只读数据使用 $ 开头
+             this._data = options.data;
+             this._el = options.el;
+             //   准备工作， 模板
+             this._templateDOM = document.querySelector( this._el );
+             this._parent = this._templateDOM.parentNode;
+             //   渲染
+             this.render()
+        } 
+
+       /**  */
+       JGVue.prototype.render = function () {
+           this.compiler();
+       }
+
+       JGVue.prototype.compiler = function () {
+            let realHTMLDOM = this._templateDOM.cloneNode( this._el );
+            compiler(realHTMLDOM, this._data);
+            this.update(realHTMLDOM)
+       }
+       JGVue.prototype.update = function (real) {
+           let curNode = document.querySelector(this._el);
+           curNode.parentNode.replaceChild(real, curNode)
+       }
+
+       new JGVue ({
+           el: '#root',
+           data: {
+               name: 'xlongwang',
+               message: '这是一个2消息'
+            }
+       })
           
 
        </script>
