@@ -18,7 +18,7 @@
           let rkh = /\{\{(.+?)\}\}/g;
           let data = {
               name: 'xlongwang',
-              message: '这是一个2消息'
+              message: '这是一个消息'
           }
 
           let tmpNode = document.querySelector('#root')
@@ -31,7 +31,10 @@
                    if( type === 3 ){
                         let txt = childNodes[ i ].nodeValue;
                         txt = txt.replace(rkh, function( _ , g ) {
-                            let key = g.trim()  
+                            // replace 使用正则匹配一次 函数就会被调用一次
+                            // 函数的 第 0 个参数 表示匹配到的内容
+                            // 函数的 第 n 个参数 表示正则中的 第 n 组
+                            let key = g.trim()    // 写在双花括号里面的 东西
                             return data[key]
                         })
                         childNodes[i].nodeValue = txt
