@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>vue源码解析</title>
+</head>
+<body>
+       <div id="root">
+            <div>
+                 <p>{{ name.firstName }} -- {{ message }}</p>
+            </div>
+            <div>{{ name.firstName }}</div>
+            <div>{{ message }}</div>
+        </div>
+       <script>
+          let rkh = /\{\{(.+?)\}\}/g;
+          let data = {
+              name: {
+                  firstName: 'wang'
+              },
+              message: '这是一个息'
+          }
+          let tmpNode = document.querySelector('#root')
+          
+          function getValueByPaths (res, path) {
+                let paths = path.split('.');
+                let props;
+                while( props = paths.shift()){
+                    res = res[props]
+                }
+                return res;
+            }
+
+          function compiler (template, datas){
+               let childNodes = template.childNodes; 
+               for(let i = 0; i < childNodes.length; i++ ){
+                   let type = childNodes[i].nodeType;
+ 
+                   if( type === 3 ){
+                        let txt = childNodes[ i ].nodeValue;
+                        txt = txt.replace(rkh, function( _ , g ) {
+                            // replace 使用正则匹配一次 函数就会被调用一次
+                            // 函数的 第 0 个参数 表示匹配到的内容
+                            // 函数的 第 n 个参数 表示正则中的 第 n 组
+                            let path = g.trim()    // 写在双花括号里面的 东西
+                            let value = getValueByPaths(datas, path)
+                            return value
+                        })
+                        childNodes[i].nodeValue = txt
+                    }else if ( type === 1){
+                        compiler( childNodes[ i ], data );
+                    }
+               }
+          }
+
+          
+          function JGVue(options) {
+             //   内部数据使用下划线 ， 只读数据使用 $ 开头
+             this._data = options.data;
+             this._el = options.el;
+             //   准备工作， 模板
+             this._templateDOM = document.querySelector( this._el );
+             this._parent = this._templateDOM.parentNode;
+             //   渲染
+             this.render()
+        } 
+
+       /**  */
+       JGVue.prototype.render = function () {
+           this.compiler();
+       }
+
+       JGVue.prototype.compiler = function () {
+            let realHTMLDOM = this._templateDOM.cloneNode( this._el );
+            compiler(realHTMLDOM, this._data);
+            this.update(realHTMLDOM)
+       }
+       JGVue.prototype.update = function (real) {
+           let curNode = document.querySelector(this._el);
+           curNode.parentNode.replaceChild(real, curNode)
+       }
+
+       new JGVue ({
+           el: '#root',
+           data: {
+               name: 'xlongwang',
+               message: '这是一个2消息'
+            }
+       })
+          
+
+       </script>
+</body>
+</html>

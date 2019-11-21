@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>getValueByPath</title>
+</head>
+<body>
+    
+</body>
+ <script>
+   function getValueByPaths (res, path) {
+      let paths = path.split('.');
+      
+      let props;
+      while( props = paths.shift()){
+          res = res[props]
+      }
+      console.log(res)
+      return res;
+   }
+   
+   let o = {
+       a:{
+           b:{
+               c:{
+                   d: "正确了！"
+               }
+           }
+       }
+   }
+   getValueByPaths(o, 'a.b')
+
+// 函数柯里写法  优化性能
+   function creatValueByPath(path) {
+       let paths = path.split('.');
+       return function getValueByPath(res) {
+            let props;
+            while( props = paths.shift()){
+                res = res[props]
+            }
+            return res;
+       }
+   }
+ 
+   let getValueByPath = creatValueByPath('a')
+   console.log(getValueByPath(o))
+ </script>
+</html>
