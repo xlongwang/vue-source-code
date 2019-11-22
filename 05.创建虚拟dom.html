@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>vue源码解析</title>
+</head>
+<body>
+       <div id="root">
+            <div class="c1" title="c1">1</div>
+            <div class="c2">2</div>
+            <div>3</div>
+            <ul class="ul1">
+                <li><div>divli33</div></li>
+                <li>li2</li>
+                <li>li3</li>
+            </ul>
+        </div>
+       
+       <script>
+           let root = document.querySelector('#root');
+           //创建 virtual dom
+           class VNode {
+               constructor (tag, data, value, type) {
+                   this.tag = tag &&　tag.toLowerCase();
+                   this.data = data;
+                   this.value = value;
+                   this.type = type;
+                   this.children = [];
+               }
+               appendChild(vnode){
+                    this.children.push(vnode)
+               }
+           }
+          
+           function creatVNode(node){
+                let nodeType = node.nodeType;
+                let _vnode = null;              
+                if(nodeType == 1){
+                    let attris = node.attributes
+                    let attrObj = {};
+                    let nodeName = node.nodeName;
+                    for(let j = 0; j < attris.length; j++ ){
+                        attrObj[attris[j].nodeName] =  attris[j].nodeValue
+                    }
+                    _vnode = new VNode(nodeName, attrObj, undefined, nodeType);
+                    // 考虑 node 的子元素
+                    let childNodes = node.childNodes;       
+                    for( let i = 0; i < childNodes.length; i++ ){
+                        _vnode.appendChild(creatVNode(childNodes[i]))
+                    }
+                }else if(nodeType == 3){
+                    _vnode = new VNode(undefined, undefined, node.nodeValue, nodeType);
+                }
+                return  _vnode;
+           }
+
+           let realDOM = root.cloneNode(true)
+           
+           let vnode = creatVNode(realDOM)
+
+        //    虚拟dom转化成 realDOM
+          function parseVNode(node){
+             let _node = null;
+             if(node.type == 1){
+                 let tag = node.tag
+                 let data = node.data
+                if(!!tag){
+                    _node = document.createElement(tag);
+                }
+                if(!!data){
+                    for(let i in data){
+                        _node.setAttribute(i, data[i])
+                    }
+                }
+             }else if(node.type == 3) {
+                if(!!node.value){
+                    return document.createTextNode(node.value); 
+                }
+             }
+            
+            node.children.forEach(subvnode => {
+                _node.appendChild(parseVNode(subvnode))   //递归转换子元素
+            })
+             return _node
+          }
+          
+         let _node =  parseVNode(vnode)
+
+       </script>
+</body>
+</html>

@@ -32,7 +32,7 @@
    }
    getValueByPaths(o, 'a.b')
 
-// 函数柯里写法  优化性能
+// 函数柯里写法  优化性能 (缓存一些内容)
    function creatValueByPath(path) {
        let paths = path.split('.');
        return function getValueByPath(res) {
